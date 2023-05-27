@@ -28,9 +28,7 @@ PyJWT==2.6.0
 pyOpenSSL==23.1.1
 python-dateutil==2.8.2
 python-decouple==3.8
-python-dotenv==1.0.0
 pytz==2023.3
-requests==2.30.0
 six==1.16.0
 SQLAlchemy==2.0.9
 typing-extensions==4.5.0
