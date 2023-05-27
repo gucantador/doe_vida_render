@@ -1,0 +1,7 @@
+__pyache__
+.pytest_cache
+test.py
+Pipfile
+.env
+venv
+__pyache__
