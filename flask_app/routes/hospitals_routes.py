@@ -15,6 +15,7 @@ def get_hospitals():
   hospitals = Hospitals.query.all()
   return jsonify(hospitals=[hospital.to_dict() for hospital in hospitals]), 200
 
+@jwt_required()
 @app.route("/hospitals/<hospital_name>")
 def get_hospital_by_hospital_name(hospital_name):
   hospital = Hospitals.query.filter_by(hospital_name=hospital_name).first()
@@ -22,15 +23,22 @@ def get_hospital_by_hospital_name(hospital_name):
     return jsonify({"error": "Hospital not found"}), 404
   else:
     return jsonify(hospital.to_dict()), 200
-  
+
+@jwt_required() 
 @app.route("/hospitals", methods=["POST"])
 def post_hospital():
   hospital_name = request.json["hospital_name"]
   city_name = request.json["city_name"]
   state = request.json["state"]
-  donations_orders = request.json["donations_orders"]
-  donations_orders_done = request.json["donations_orders_done"]
-  donations_orders_cancelled = request.json["donations_orders_cancelled"]
+
+  hospital_name = request.json["hospital_name"]
+  city_name = request.json["city_name"]
+  state = request.json["state"]
+
+  donations_orders = request.json.get("donations_orders")
+  donations_orders_done = request.json.get("donations_orders_done")
+  donations_orders_cancelled = request.json.get("donations_orders_cancelled")
+
 
   new_hospital = Hospitals(
     hospital_name=hospital_name,
@@ -46,6 +54,7 @@ def post_hospital():
 
   return jsonify(new_hospital.to_dict()), 200
 
+@jwt_required()
 @app.route("/hospitals/<string:hospital_name>", methods=["PUT"])
 def update_hospital_by_hospital_name(hospital_name):
   hospital = Hospitals.query.filter_by(hospital_name=hospital_name).first()
@@ -57,6 +66,7 @@ def update_hospital_by_hospital_name(hospital_name):
   db.session.commit()
   return jsonify(hospital.to_dict()), 200
 
+@jwt_required()
 @app.route("/hospitals/<string:hospital_name>", methods=["DELETE"])
 def delete_hospital_by_hospital_name(hospital_name):
   hospital = Hospitals.query.filter_by(hospital_name=hospital_name).first()

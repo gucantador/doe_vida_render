@@ -15,6 +15,7 @@ def get_donations_orders():
   donations_orders = Donation_order.query.all()
   return jsonify(donations_orders=[donation_order.to_dict() for donation_order in donations_orders]), 200
 
+@jwt_required()
 @app.route("/donations_orders/<int:donation_order_id>", methods=["GET"])
 def get_donation_order_by_id(donation_order_id):
   donation_order = Donation_order.query.get(donation_order_id)
@@ -22,7 +23,8 @@ def get_donation_order_by_id(donation_order_id):
     return jsonify({"error": "Donation order not found"}), 404
   else:
     return jsonify(donation_order.to_dict()), 200
-  
+
+@jwt_required()
 @app.route("/donations_orders", methods=["POST"])
 def post_donation_order():
   patient_name = request.json["patient_name"]
@@ -35,7 +37,7 @@ def post_donation_order():
   state = request.json["state"]
 
   if check_hospital_db(hospital, city_name, state) == False:
-    new_hospital = Hospitals(hospital_name=hospital, city_name=city_name, state=state, donation_orders=1)
+    new_hospital = Hospitals(hospital_name=hospital, city_name=city_name, state=state, donations_orders=1)
     db.session.add(new_hospital)
     db.session.commit()
 
@@ -63,6 +65,7 @@ def post_donation_order():
 
   return jsonify(new_donation_order.to_dict()), 200
 
+@jwt_required()
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
 def update_donation_order(donation_order_id):
   donation_order = Donation_order.query.filter_by(id=donation_order_id).first()
