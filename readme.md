@@ -1,4 +1,208 @@
-# BACKEND API
+# DOE VIDA API
+
+A API utiliza JWT tokens. A lógica funciona da seguinte maneira:
+- Para toda requisição em rotas protegitas com JWT é necessário passar o JWT token no headers do request.
+- Para conseguir o token, é necessário ter uma conta (se não tiver basta criar, utilizando o POST da rota users) e fazer o login.
+- Após o login, serão retornados o Accsses Token e o Refresh token. O Access tem a duração de 1 hora, e o Refresh tem a duração de 30 dias.
+- Caso o access token espire, é necessário fazer uma requisição para a rota de repfresh passando o refresh token.
+
+## ROTAS
+
+NOTA: Substituir a URL base caso esteja usando localhost!
+
+### USERS
+
+```git
+https://doevida.onrender.com/users
+```
+POST
+- Cria um novo usuario.
+
+```git
+{
+    "password": "secret_pass",
+    "username": "example@gmail.com"    
+}
+```
+
+GET
+- Retorna todos os usúarios cadastrados.
+- Necessita JWT token.
+
+### LOGIN
+
+```git
+https://doevida.onrender.com/login
+```
+POST
+- Cria um novo usuario
+- Retorna um access e um refresh token.
+
+```git
+{
+    "password": "secret_pass",
+    "username": "example@gmail.com"    
+}
+```
+
+### refresh
+
+```git
+https://doevida.onrender.com/refresh
+```
+POST
+- Enviar com o refresh token no headers.
+- Retorna um novo access token.
+
+### users/usuario
+
+Nota: Consideramos usuario o email do cadastrado.
+
+```git
+https://doevida.onrender.com/users/usuario
+```
+PUT
+- Necessita JWT token.
+- Realiza o update de um usuário.
+- Não é necessário passar tudo de uma vez no JSON.
+
+```git
+{
+    "birthdate": "10/01/2001",
+    "blood_type": "A+",
+    "city": "Campinas",
+    "date_last_donation": null,
+    "first_name": "jason",
+    "id": "12",
+    "last_name": "roberts",
+    "password": "changed_password",
+    "phone": "19914598",
+    "qty_donations": "4",
+    "sex": false,
+    "state": "ceara",
+    "username": "jeffersondsad"
+}
+```
+
+GET
+- Retorna o usuario.
+- Necessita JWT token.
+
+DELETE
+- Deleta o usuário.
+- Necessita JWT token.
+
+### hospitals
+
+```git
+https://doevida.onrender.com/hospitals
+```
+POST
+- Cadastra um novo hospital.
+
+```git
+{
+    "city_name": "campinas",
+    "hospital_name": "Hemocentro Campinas",
+    "state": 1
+}
+```
+
+GET
+- Retorna todos os hospitais cadastrados.
+
+### hospitals/hospital
+
+```git
+https://doevida.onrender.com/hospitals/hospital_name
+```
+
+GET
+- Retorna o hospital.
+- Necessita JWT.
+
+PUT
+- Necessita JWT
+- Atualiza informações de um hospital
+```git
+{
+    "city_name": "campinas",
+    "hospital_name": "Hemocentro Campinas",
+    "state": 1,
+    "donations_orders": 1,
+    "donations_orders_done":1,
+    "donations_orders_cancelled":3
+}
+```
+DELETE
+- Deleta um hospital
+- Necessita JWT.
+
+### donations_orders
+
+```git
+https://doevida.onrender.com/donations_orders
+```
+
+GET
+- Retorna todos os pedidos de doações.
+
+POST
+- Necessita JWT.
+- Adiciona um novo pedido de doação.
+- Caso o hospital seja novo, cadastra o hospital no banco.
+- Adiciona um pedido de doação para o hospital.
+
+```git
+{	
+	"patient_name":"jailson",
+	"blood_type":1,
+	"description":"donation",
+	"qty_bags":4,
+	"hospital":"dolores",
+    "requester":1,
+    "city_name": "campinas",
+    "state": 1
+}
+```
+### donations_orders/donation
+
+```git
+https://doevida.onrender.com/donations_orders/donation_id
+```
+
+GET
+- Retorna a doação.
+- Necessita JWT.
+
+PUT
+- Atualiza a doação.
+- Utilizar para mudar o status da doação.
+- Quando altera o status da doação, altera na tabela dos hospitais as quantidades de ordens completadas e canceladas.
+
+```git
+Exemplo de alteração de status.
+
+{	
+    "status": "cancelled"
+}
+```
+
+Mas caso queira alterar algum outro aspecto da doação também pode.
+
+```git
+{	
+	"patient_name":"jailson",
+	"blood_type":1,
+	"description":"donation",
+	"qty_bags":4,
+	"hospital":"dolores",
+    "requester":1,
+    "city_name": "campinas",
+    "state": 1
+    "status": "cancelled"
+}
+```
 
 
 ## COMO RODAR A API

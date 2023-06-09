@@ -5,11 +5,17 @@ from flask_app.utils import check_and_update, check_username
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
 
 def get_app():
+    """
+    Returns the Flask application object. 
+    This function imports the Flask application object from the `flask_app` module and returns it.
+    This must be done so there is no circular import problem.
+    """
     from flask_app import app
     return app
 
 app = get_app()
 
+@jwt_required()
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
@@ -85,4 +91,3 @@ def delete_user_by_username(username):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"success": "deleted user"}), 200
-

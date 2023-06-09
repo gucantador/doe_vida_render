@@ -27,10 +27,24 @@ def token_required(f):
 
 
 def is_valid_email(email):
+    """
+    Checks if the given email address is valid.
+    Parameters:
+        email (str): The email address to check.
+    Returns:
+        bool: True if the email address is valid, False otherwise.
+    """
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
 def check_username(email):
+    """
+    Checks if the given email address is in codition to be saved in the database.
+    Parameters:
+        email (str): The email address to check.
+    Returns:
+        An error message or None in case everythign is ok.
+    """
     if len(email) > 80:
         return {"Erro": "Seu email precisa ter menos que 80 caracteres."}
     if email is None or len(email) == 0:
@@ -40,6 +54,13 @@ def check_username(email):
     return None
 
 def check_and_update(user, **json_data):
+    """
+    Checks which expected keys are present in a JSON data.
+    Parameters:
+        user (object); **json_data (dict);
+    Returns:
+        user object updated.
+    """
     if json_data.get('first_name') is not None:
         user.first_name = json_data['first_name']
     if json_data.get('last_name') is not None:
@@ -63,6 +84,16 @@ def check_and_update(user, **json_data):
     return user
 
 def check_and_update_hospitals(hospital, **json_data):
+  """
+  Checks which expected keys are present in a JSON data and updates the hospital object accordingly.
+
+  Parameters:
+      hospital (object): The hospital object to update.
+      json_data (dict): The JSON data to check.
+
+  Returns:
+      The updated hospital object.
+  """
   if json_data.get('hospital_name') is not None:
     hospital.hospital_name = json_data['hospital_name']
   if json_data.get('city_name') is not None:
@@ -78,6 +109,17 @@ def check_and_update_hospitals(hospital, **json_data):
   return hospital
 
 def check_hospital_db(hospital, city_name, state):
+    """
+    Checks if the hospital is already in the database.
+
+    Parameters:
+        hospital (string): The hospital name.
+        city_name (string): The city name where the hospital is located.
+        state (int): The state where the hospital is located.
+
+    Returns:
+        Bool: True if the hospital is already in the databse, false otherwise.
+    """
     try:
         hospital = Hospitals.query.filter_by(hospital_name=hospital).first()
         if hospital.city_name == city_name and hospital.state == state:
@@ -86,6 +128,16 @@ def check_hospital_db(hospital, city_name, state):
         return False
     
 def check_and_update_donations(donation_order, **json_data):
+  """
+  Checks which expected keys are present in a JSON data and updates the hospital object accordingly.
+
+  Parameters:
+      donation_order (object): The donation_order object to update.
+      json_data (dict): The JSON data to check.
+
+  Returns:
+      The updated donation order object.
+  """
   if json_data.get('patient_name') is not None:
     donation_order.patient_name = json_data['patient_name']
   if json_data.get('blood_type') is not None:
@@ -109,31 +161,37 @@ def check_and_update_donations(donation_order, **json_data):
   return donation_order
 
 def check_and_update_donation_status(order):
-   if order.status == "completed":
-      print(order.hospital)
-      hospital = Hospitals.query.get(order.hospital)
-      print(hospital)
-      if hospital.donations_orders_done is None:
-         hospital.donations_orders_done = 1
-      else:
-         hospital.donations_orders_done = hospital.donations_orders_done + 1 
-      db.session.add(hospital)
-      db.session.commit()
+  """
+  Checks the status of the donation order and uptdate in the database if needded.
 
-      order.status = 'completed'
-      db.session.add(order)
-      db.session.commit()
+  Parameters:
+      order (object): The donation_order object to update.
+  """
+  if order.status == "completed":
+    print(order.hospital)
+    hospital = Hospitals.query.get(order.hospital)
+    print(hospital)
+    if hospital.donations_orders_done is None:
+        hospital.donations_orders_done = 1
+    else:
+        hospital.donations_orders_done = hospital.donations_orders_done + 1 
+    db.session.add(hospital)
+    db.session.commit()
 
-   if order.status == "cancelled":
-      hospital = Hospitals.query.get(order.hospital)
-      if hospital.donations_orders_cancelled is None:
-         hospital.donations_orders_cancelled = 1
-      else:
-         hospital.donations_orders_cancelled = hospital.donations_orders_cancelled + 1 
-      db.session.add(hospital)
-      db.session.commit()
+    order.status = 'completed'
+    db.session.add(order)
+    db.session.commit()
 
-      order.status = 'cancelled'
-      db.session.add(order)
-      db.session.commit()
-    
+  if order.status == "cancelled":
+    hospital = Hospitals.query.get(order.hospital)
+    if hospital.donations_orders_cancelled is None:
+        hospital.donations_orders_cancelled = 1
+    else:
+        hospital.donations_orders_cancelled = hospital.donations_orders_cancelled + 1 
+    db.session.add(hospital)
+    db.session.commit()
+
+    order.status = 'cancelled'
+    db.session.add(order)
+    db.session.commit()
+
