@@ -92,7 +92,7 @@ class Hospitals(db.Model):
                 'donations_orders_done': self.donations_orders_done,
                 'donations_orders_cancelled': self.donations_orders_cancelled,
             }
-    #quando for passar o hospital tem que passar com a variavel com o nome do que ta no backreff!!!!!!!! CORRIGIR
+
 class Donation_order(db.Model):
     
      id = db.Column(db.Integer, primary_key=True)

@@ -195,3 +195,19 @@ def check_and_update_donation_status(order):
     db.session.add(order)
     db.session.commit()
 
+def load_roles():
+  
+  roles = {
+      'admin': {
+          'role': 'admin',
+          'can_view_all_users': True,
+          'can_edit_all_users': True,
+      },
+      'user': {
+          'role': 'user',
+          'can_view_own_data': True,
+          'can_edit_own_data': True,
+      },
+  }
+
+  return roles

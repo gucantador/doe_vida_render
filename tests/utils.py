@@ -37,6 +37,20 @@ def create_hospital():
      
      return data
 
+def create_donation_order():
+   data = {
+          "patient_name": "John Doe",
+          "blood_type": "O-",
+          "description": "Patient is in need of blood.",
+          "qty_bags": 2,
+          "hospital": "John Hopkins Hospital",
+          "requester": "Dr. Smith",
+          "city_name": "Baltimore",
+          "state": 1
+          }
+   
+   return data
+
 def create_user_and_login():
 
      user = generate_user()

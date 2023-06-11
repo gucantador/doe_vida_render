@@ -2,7 +2,7 @@ from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import Donation_order, Hospitals, User
 from flask_app.utils import check_and_update_donations, check_hospital_db, check_and_update_donation_status
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
+from flask_jwt_extended import jwt_required, get_jwt
 
 def get_app():
     from flask_app import app
@@ -15,7 +15,6 @@ def get_donations_orders():
   donations_orders = Donation_order.query.all()
   return jsonify(donations_orders=[donation_order.to_dict() for donation_order in donations_orders]), 200
 
-@jwt_required()
 @app.route("/donations_orders/<int:donation_order_id>", methods=["GET"])
 def get_donation_order_by_id(donation_order_id):
   donation_order = Donation_order.query.get(donation_order_id)
@@ -24,8 +23,8 @@ def get_donation_order_by_id(donation_order_id):
   else:
     return jsonify(donation_order.to_dict()), 200
 
-@jwt_required()
 @app.route("/donations_orders", methods=["POST"])
+@jwt_required()
 def post_donation_order():
   patient_name = request.json["patient_name"]
   blood_type = request.json["blood_type"]
@@ -35,6 +34,11 @@ def post_donation_order():
   requester = request.json["requester"]
   city_name = request.json["city_name"]
   state = request.json["state"]
+
+  requester = User.query.get(requester)
+  claims = get_jwt()
+  if claims["role"]=='user' and claims['sub'] != requester.username:
+      return jsonify(error="The requester needs to be the same as the current user of the app.")
 
   if check_hospital_db(hospital, city_name, state) == False:
     new_hospital = Hospitals(hospital_name=hospital, city_name=city_name, state=state, donations_orders=1)
@@ -49,8 +53,6 @@ def post_donation_order():
   db.session.add(hospital)
   db.session.commit()
   
-  requester = User.query.get(requester)
-
   new_donation_order = Donation_order(
     patient_name=patient_name,
     blood_type=blood_type,
@@ -65,10 +67,13 @@ def post_donation_order():
 
   return jsonify(new_donation_order.to_dict()), 200
 
-@jwt_required()
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
+@jwt_required()
 def update_donation_order(donation_order_id):
+  claims = get_jwt()
   donation_order = Donation_order.query.filter_by(id=donation_order_id).first()
+  if claims["role"]=='user' and claims['sub'] != donation_order.user.username:
+    return jsonify(error="The requester needs to be the same as the current user of the app.")
   if donation_order is None:
     return jsonify({"Error": "Donation order not found"}), 404
   changed_donation_order_data = request.get_json()
