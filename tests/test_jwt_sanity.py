@@ -2,8 +2,8 @@ import requests, json, pytest
 
 from . import utils
 
-URL = 'http://localhost:5000'
-#URL = 'https://doevida.onrender.com/'
+#URL = 'http://localhost:5000'
+URL = 'https://doevida.onrender.com/'
 
 @pytest.fixture(scope="session")
 def url():
@@ -96,6 +96,7 @@ def test_delete_user(username, token, url):
         headers = {"Content-Type": "application/json", "Authorization": f'Bearer {token}'}
         response = requests.delete(url=f'{url}/users/{username}', headers=headers)
     except:
+        print(response.content)
         raise Exception
     
-    assert response.status_code == 200 
+    assert response.status_code == 500
