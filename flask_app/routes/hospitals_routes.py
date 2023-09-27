@@ -1,9 +1,8 @@
 from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import Hospitals
-from flask_app.utils import check_and_update_hospitals
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token, get_jwt
-from flask_jwt_extended import exceptions  #TODO Find a way to put the error message inside the BaseResponse object, maybe create an exception class that enhirit the Flask_Excption class and returns the error
+from flask_app.utils import check_and_update_hospitals, jwt_handling, parse_hospital_name
+from flask_jwt_extended import get_jwt
 from flask_app.constants import errors, messages
 from . import BaseResponse
 
@@ -26,7 +25,7 @@ def get_hospitals():
     response.response()
 
 @app.route("/hospitals/<hospital_name>")
-@jwt_required()
+@jwt_handling
 def get_hospital_by_hospital_name(hospital_name):  #TODO parse hospital name to underline instead of blank spaces
   try:
     
@@ -49,7 +48,7 @@ def get_hospital_by_hospital_name(hospital_name):  #TODO parse hospital name to 
     return response.response()
   
 @app.route("/hospitals/<int:id>")
-@jwt_required()
+@jwt_handling
 def get_hospital_by_id(id):
   try:
     claims = get_jwt()
@@ -64,14 +63,14 @@ def get_hospital_by_id(id):
 
     response = BaseResponse(data=user.to_dict(), errors=None, message=messages["GENERAL_SUCCESS"])
     return response.response(), 200 
-  
+    
   except Exception as e:
     print(e)
     response = BaseResponse(data=None, errors=errors["INTERNAL_ERROR"], message=messages["INTERNAL_ERROR"])
     return response.response()
 
 @app.route("/hospitals", methods=["POST"])
-@jwt_required() 
+@jwt_handling
 def post_hospital():
   try:
     claims = get_jwt()
@@ -114,7 +113,7 @@ def post_hospital():
     return response.response()
 
 @app.route("/hospitals/<string:hospital_name>", methods=["PUT"])
-@jwt_required()
+@jwt_handling
 def update_hospital_by_hospital_name(hospital_name):
   try:
     claims = get_jwt()
@@ -139,7 +138,7 @@ def update_hospital_by_hospital_name(hospital_name):
     return response.response()
 
 @app.route("/hospitals/<string:hospital_name>", methods=["DELETE"])
-@jwt_required()
+@jwt_handling
 def delete_hospital_by_hospital_name(hospital_name):
   try:
     claims = get_jwt()

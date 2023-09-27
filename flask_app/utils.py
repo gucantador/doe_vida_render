@@ -4,6 +4,9 @@ from flask import jsonify, request
 from functools import wraps
 from . import app, db
 from flask_app.models import Hospitals
+from flask_app.routes import BaseResponse
+from flask_jwt_extended import jwt_required
+from functools import wraps
 
 def token_required(f):
     @wraps(f)
@@ -25,6 +28,17 @@ def token_required(f):
 
     return decorated
 
+def jwt_handling(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            jwt_required()(fn)(*args, **kwargs)
+            return fn(*args, **kwargs)
+        except Exception as e:
+            response = BaseResponse(data=None, errors=str(e), message="jwt_error")
+            return response.response()
+
+    return wrapper
 
 def is_valid_email(email):
     """
@@ -211,3 +225,9 @@ def load_roles():
   }
 
   return roles
+
+def parse_hospital_name(hospital_name):
+    if len(hospital_name.split(' ')) > 1:
+        parsed_string = hospital_name.replace(" ", "_").lower()
+        return parsed_string
+    return hospital_name

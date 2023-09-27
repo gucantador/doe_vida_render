@@ -1,10 +1,11 @@
 from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import User
-from flask_app.utils import check_and_update, check_username, load_roles
+from flask_app.utils import check_and_update, check_username, load_roles, jwt_handling
 from flask_app.constants import errors, messages
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token, get_jwt
 from . import BaseResponse
+from flask_app.constants import errors, messages
 
 
 def get_app():
@@ -19,7 +20,7 @@ def get_app():
 app = get_app()
 
 @app.route('/users', methods=['GET'])
-@jwt_required()
+@jwt_handling
 def get_users():
     claims = get_jwt()
     if claims["role"]=='user':
@@ -54,6 +55,7 @@ def login():
             if user["username"] != "doe.vidaesangue@gmail.com":
                 access_token = create_access_token(identity=user_db.username, additional_claims=additional_claims["user"])
                 refresh_token = create_refresh_token(identity=user_db.username, additional_claims=additional_claims["user"])
+                tokens = dict(access_token=access_token, refresh_token=refresh_token)
             else:
                 access_token = create_access_token(identity=user_db.username, additional_claims=additional_claims["admin"])
                 refresh_token = create_refresh_token(identity=user_db.username, additional_claims=additional_claims["admin"])
@@ -81,7 +83,7 @@ def refresh():
         response = BaseResponse(data=None, error=errors["REFRESH_ERROR"], message=messages["REFRESH_ERROR"])
     
 @app.route('/users/<string:username>', methods=['GET'])
-@jwt_required()
+@jwt_handling
 def get_user_by_username(username):
     claims = get_jwt()
     if claims["role"]=='user' and claims['sub'] != username:
@@ -96,7 +98,7 @@ def get_user_by_username(username):
         return response.response(), 200
 
 @app.route('/users/<int:id>', methods=['GET'])
-@jwt_required()
+@jwt_handling
 def get_user_by_id(id):
     claims = get_jwt()
     user = User.query.get(id)
@@ -112,7 +114,7 @@ def get_user_by_id(id):
     return response.response(), 200 
 
 @app.route('/users/<string:username>', methods=['PUT'])
-@jwt_required()
+@jwt_handling
 def update_user_by_username(username):
     claims = get_jwt()
     if claims["role"]=='user' and claims['sub'] != username:
@@ -136,7 +138,7 @@ def update_user_by_username(username):
 
 
 @app.route('/users/<string:username>', methods=['DELETE'])
-@jwt_required()
+@jwt_handling
 def delete_user_by_username(username):
     claims = get_jwt()
     if claims["role"]=='user' and claims['sub'] != username:

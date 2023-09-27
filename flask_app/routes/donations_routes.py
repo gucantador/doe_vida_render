@@ -1,7 +1,7 @@
 from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import Donation_order, Hospitals, User
-from flask_app.utils import check_and_update_donations, check_hospital_db, check_and_update_donation_status
+from flask_app.utils import check_and_update_donations, check_hospital_db, check_and_update_donation_status, jwt_handling
 from flask_jwt_extended import jwt_required, get_jwt
 from . import BaseResponse
 from flask_app.constants import errors, messages
@@ -40,7 +40,7 @@ def get_donation_order_by_id(donation_order_id):
     return response.response()
 
 @app.route("/donations_orders", methods=["POST"])
-@jwt_required()
+@jwt_handling
 def post_donation_order():
   try:
     patient_name = request.json["patient_name"]
@@ -93,7 +93,7 @@ def post_donation_order():
     return response.response()
 
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
-@jwt_required()
+@jwt_handling
 def update_donation_order(donation_order_id):
   claims = get_jwt()
   donation_order = Donation_order.query.filter_by(id=donation_order_id).first()
