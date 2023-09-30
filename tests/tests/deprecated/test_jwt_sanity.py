@@ -99,4 +99,4 @@ def test_delete_user(username, token, url):
         print(response.content)
         raise Exception
     
-    assert response.status_code == 500
+    assert response.status_code == 200
