@@ -1,7 +1,7 @@
 from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import Donation_order, Hospitals, User
-from flask_app.utils import check_and_update_donations, check_hospital_db, check_and_update_donation_status, jwt_handling
+from flask_app.utils.utils import check_and_update_donations, check_hospital_db, check_and_update_donation_status, jwt_handling
 from flask_jwt_extended import jwt_required, get_jwt
 from . import BaseResponse
 from flask_app.constants import errors, messages
@@ -22,7 +22,7 @@ def get_donations_orders():
   except Exception as e:
     print(e)
     response = BaseResponse(data=None, errors=errors["INTERNAL_ERROR"], message=messages["INTERNAL_ERROR"])
-    response.response()
+    return response.response()
 
 @app.route("/donations_orders/<int:donation_order_id>", methods=["GET"])
 def get_donation_order_by_id(donation_order_id):
@@ -49,19 +49,12 @@ def post_donation_order():
     qty_bags = request.json["qty_bags"]
     hospital = request.json["hospital"]
     requester = request.json["requester"]
-    city_name = request.json["city_name"]
-    state = request.json["state"]
 
     requester = User.query.get(requester)
     claims = get_jwt()
     if claims["role"]=='user' and claims['sub'] != requester.username:
       response = BaseResponse(data=None, errors=errors["NOT_ACCESS_ERROR"], message=messages["NOT_ACCESS_ERROR_MESSAGE"])
-      return response.response(), 403  
-
-    if check_hospital_db(hospital, city_name, state) == False:
-      new_hospital = Hospitals(hospital_name=hospital, city_name=city_name, state=state, donations_orders=1)
-      db.session.add(new_hospital)
-      db.session.commit()
+      return response.response(), 403
 
     hospital = Hospitals.query.filter_by(hospital_name=hospital).first()
     if hospital.donations_orders is None:
@@ -77,7 +70,8 @@ def post_donation_order():
       description=description,
       qty_bags=qty_bags,
       hospitals=hospital,
-      user=requester
+      user=requester,
+      city_name=hospital.city_name
     )
 
     db.session.add(new_donation_order)

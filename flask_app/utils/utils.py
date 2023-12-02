@@ -2,11 +2,49 @@ import re
 import jwt
 from flask import jsonify, request
 from functools import wraps
-from . import app, db
+from flask_app import app, db
 from flask_app.models import Hospitals
 from flask_app.routes import BaseResponse
 from flask_jwt_extended import jwt_required
 from functools import wraps
+import secrets
+import smtplib
+from email.message import EmailMessage
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+
+def generate_numeric_token():
+    token = ''.join(secrets.choice('0123456789') for _ in range(6))
+    return token
+
+def send_email(token, to_email):  # TODO Make infos environ variables
+    msg = EmailMessage()
+    msg['From'] = 'doevidarecuperacao@outlook.com'
+    msg['To'] = to_email
+    msg['Subject'] = 'DOE VIDA - RECUPERAÇÃO DE SENHA'
+
+    # Adicione o corpo do e-mail como texto simples
+    msg.set_content(f"Token para alteração de senha: {token}")
+
+    # Conecta-se ao servidor SMTP
+    smtp_server = smtplib.SMTP('smtp-mail.outlook.com', 587)
+    smtp_server.starttls()
+
+    # Autentica no servidor SMTP
+    smtp_server.login('doevidarecuperacao@outlook.com', 'doevida@2023')
+
+    # Envia o e-mail
+    smtp_server.send_message(msg)
+
+    # Fecha a conexão com o servidor SMTP
+    smtp_server.quit()
+    
+def create_token_and_send_email(email):
+    token = generate_numeric_token()
+    send_email(token, email)
+    return token
+        
 
 def token_required(f):
     @wraps(f)
@@ -231,3 +269,26 @@ def parse_hospital_name(hospital_name):
         parsed_string = hospital_name.replace(" ", "_").lower()
         return parsed_string
     return hospital_name
+
+
+def can_donate(blood_type):
+    # Define blood type compatibility
+    compatibility = {
+        'O-': ['O-'],
+        'O+': ['O-', 'O+'],
+        'A-': ['A-', 'O-'],
+        'A+': ['A-', 'A+', 'O-', 'O+'],
+        'B-': ['B-', 'O-'],
+        'B+': ['B-', 'B+', 'O-', 'O+'],
+        'AB-': ['A-', 'B-', 'AB-', 'O-'],
+        'AB+': ['A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+']
+    }
+
+    # Convert input blood type to uppercase for case-insensitivity
+    blood_type = blood_type.upper()
+
+    # Check if the input blood type is in the compatibility dictionary
+    if blood_type in compatibility:
+        return compatibility[blood_type]
+    else:
+        return []

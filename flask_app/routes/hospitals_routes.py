@@ -1,7 +1,7 @@
 from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import Hospitals
-from flask_app.utils import check_and_update_hospitals, jwt_handling, parse_hospital_name
+from flask_app.utils.utils import check_and_update_hospitals, jwt_handling, parse_hospital_name
 from flask_jwt_extended import get_jwt
 from flask_app.constants import errors, messages
 from . import BaseResponse
@@ -22,7 +22,7 @@ def get_hospitals():
   except Exception as e:
     print(e)
     response = BaseResponse(data=None, errors=errors["INTERNAL_ERROR"], message=messages["INTERNAL_ERROR"])
-    response.response()
+    return response.response()
 
 @app.route("/hospitals/<hospital_name>")
 @jwt_handling
