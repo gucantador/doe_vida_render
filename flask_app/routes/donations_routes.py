@@ -40,7 +40,7 @@ def get_donation_order_by_id(donation_order_id):
     return response.response()
 
 @app.route("/donations_orders", methods=["POST"])
-@jwt_handling
+@jwt_required()
 def post_donation_order():
   try:
     patient_name = request.json["patient_name"]
@@ -87,7 +87,7 @@ def post_donation_order():
     return response.response()
 
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
-@jwt_handling
+@jwt_required()
 def update_donation_order(donation_order_id):
   claims = get_jwt()
   donation_order = Donation_order.query.filter_by(id=donation_order_id).first()

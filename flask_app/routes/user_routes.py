@@ -22,7 +22,7 @@ def get_app():
 app = get_app()
 
 @app.route('/users', methods=['GET'])
-@jwt_handling
+@jwt_required()
 def get_users():
     try:
         claims = get_jwt()
@@ -140,7 +140,7 @@ def refresh():
         response = BaseResponse(data=None, error=errors["REFRESH_ERROR"], message=messages["REFRESH_ERROR"])
     
 @app.route('/users/<string:username>', methods=['GET'])
-@jwt_handling
+@jwt_required()
 def get_user_by_username(username):
     try:
         claims = get_jwt()
@@ -160,7 +160,7 @@ def get_user_by_username(username):
         return response.response(), 500
 
 @app.route('/users/<int:id>', methods=['GET'])
-@jwt_handling
+@jwt_required()
 def get_user_by_id(id):
     try:
         claims = get_jwt()
@@ -181,7 +181,7 @@ def get_user_by_id(id):
         return response.response(), 500
 
 @app.route('/users/<string:username>', methods=['PUT'])
-@jwt_handling
+@jwt_required()
 def update_user_by_username(username):
     claims = get_jwt()
     if claims["role"]=='user' and claims['sub'] != username:
@@ -228,7 +228,7 @@ def delete_user_by_username(username):
         return response.response(), 500
 
 @app.route('/users/<string:username>/matches', methods=['GET'])
-@jwt_handling
+@jwt_required()
 def get_matches(username):
     try:
         claims = get_jwt()

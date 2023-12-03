@@ -13,11 +13,9 @@ from flask_app.constants import errors, messages
 import base64
 from flask_jwt_extended import jwt_required
 
-# ... (previous code)
 
-# Example route for creating a new post
 @app.route('/posts', methods=['POST'])
-@jwt_handling
+@jwt_required()
 def create_post():
     try:
         data = request.get_json()
@@ -46,7 +44,7 @@ def get_all_posts():
 
 # Example route for getting a specific post by ID
 @app.route('/posts/<int:id>', methods=['GET'])
-@jwt_handling
+@jwt_required()
 def get_post_by_id(id):
     try:
         post = Posts.query.get(id)
@@ -62,7 +60,7 @@ def get_post_by_id(id):
 
 
 @app.route('/posts/<int:id>', methods=['PUT'])
-@jwt_handling
+@jwt_required()
 def update_post_by_id(id):
     try:
         post = Posts.query.get(id)

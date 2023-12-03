@@ -26,7 +26,7 @@ def get_hospitals():
     return response.response()
 
 @app.route("/hospitals/<hospital_name>")
-@jwt_handling
+@jwt_required()
 def get_hospital_by_hospital_name(hospital_name):  #TODO parse hospital name to underline instead of blank spaces
   try:
     
@@ -49,7 +49,7 @@ def get_hospital_by_hospital_name(hospital_name):  #TODO parse hospital name to 
     return response.response()
   
 @app.route("/hospitals/<int:id>")
-@jwt_handling
+@jwt_required()
 def get_hospital_by_id(id):
   try:
     claims = get_jwt()
@@ -71,21 +71,19 @@ def get_hospital_by_id(id):
     return response.response()
 
 @app.route("/hospitals", methods=["POST"])
-@jwt_handling
+@jwt_required()
 def post_hospital():
   try:
     claims = get_jwt()
     if claims["role"] == 'user':
           response = BaseResponse(data=None, errors=errors["NOT_ACCESS_ERROR"], message=messages["NOT_ACCESS_ERROR_MESSAGE"])
-          return response.response(), 403 
+          return response.response(), 403
 
     hospital_name = request.json["hospital_name"]
     city_name = request.json["city_name"]
     state = request.json["state"]
-
-    hospital_name = request.json["hospital_name"]
-    city_name = request.json["city_name"]
-    state = request.json["state"]
+    latitude = request.json["latitude"]
+    longitude = request.json["longitude"]
 
     donations_orders = request.json.get("donations_orders")
     donations_orders_done = request.json.get("donations_orders_done")
@@ -99,6 +97,8 @@ def post_hospital():
       donations_orders=donations_orders,
       donations_orders_done=donations_orders_done,
       donations_orders_cancelled=donations_orders_cancelled,
+      latitude=latitude,
+      longitude=longitude
     )
 
     db.session.add(new_hospital)
@@ -114,7 +114,7 @@ def post_hospital():
     return response.response()
 
 @app.route("/hospitals/<string:hospital_name>", methods=["PUT"])
-@jwt_handling
+@jwt_required()
 def update_hospital_by_hospital_name(hospital_name):
   try:
     claims = get_jwt()
