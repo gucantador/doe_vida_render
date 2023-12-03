@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_to
 from . import BaseResponse
 from flask_app.constants import errors, messages
 import base64
+from flask_jwt_extended import jwt_required
 
 
 def get_app():
@@ -205,7 +206,7 @@ def update_user_by_username(username):
 
 
 @app.route('/users/<string:username>', methods=['DELETE'])
-@jwt_handling
+@jwt_required()
 def delete_user_by_username(username):
     try:
         claims = get_jwt()

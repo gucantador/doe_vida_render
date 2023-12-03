@@ -11,4 +11,4 @@ class BaseResponse():
     def response(self):
         return jsonify(dict(data=self.data, errors=self.errors, message=self.message, success=self.success))
     
-from . import user_routes, hospitals_routes, donations_routes, hello_route
+from . import user_routes, hospitals_routes, donations_routes, hello_route, posts_routes

@@ -27,27 +27,44 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
     
-    def to_dict(self):
+    def to_dict(self, private=False):
+        
+        if private:
             return {
                 'id': str(self.id),
                 'username': self.username,
                 'password': self.password,
                 'first_name': self.first_name,
                 'last_name': self.last_name,
-                'birthdate': self.birthdate,
-                'blood_type': self.blood_type,
-                'phone': self.phone,
-                'sex': bool(self.sex),
                 'qty_donations': (self.qty_donations),
                 'date_last_donation': self.date_last_donation,
                 'state': self.state,
                 'city': self.city,
                 'donations_orders': f'{self.get_donations()}',
                 'posts': f'{self.get_posts()}',
-                'comments': f'{self.get_comments()}',
-                'password_reset_token': self.password_reset_token,
                 'photo': self.photo
             }
+            
+        return {
+            'id': str(self.id),
+            'username': self.username,
+            'password': self.password,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'birthdate': self.birthdate,
+            'blood_type': self.blood_type,
+            'phone': self.phone,
+            'sex': bool(self.sex),
+            'qty_donations': (self.qty_donations),
+            'date_last_donation': self.date_last_donation,
+            'state': self.state,
+            'city': self.city,
+            'donations_orders': f'{self.get_donations()}',
+            'posts': f'{self.get_posts()}',
+            'comments': f'{self.get_comments()}',
+            'password_reset_token': self.password_reset_token,
+            'photo': self.photo
+        }
 
     def set_password(self, password):
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -90,6 +107,8 @@ class Hospitals(db.Model):
      donations_orders_done = db.Column(db.Integer)
      donations_orders_cancelled = db.Column(db.Integer)
      donation_order = db.relationship("Donation_order", backref='hospitals')
+     latitude = db.Column(db.Float, nullable=True)
+     longitude = db.Column(db.Float, nullable=True)
 
      def __repr__(self):
         return '<Hospitals %r>' % self.hospital_name
@@ -103,6 +122,8 @@ class Hospitals(db.Model):
                 'donations_orders': self.donations_orders,
                 'donations_orders_done': self.donations_orders_done,
                 'donations_orders_cancelled': self.donations_orders_cancelled,
+                'latitude': self.latitude,
+                'longitude': self.longitude
             }
 
 class Donation_order(db.Model):  # TODO Update or handle integer for blood type
@@ -150,22 +171,23 @@ class Posts(db.Model):
     def __repr__(self):
         return f'<Post "{self.title}">'
     
-    def to_dict(self):
+    def to_dict(self):   # TODO Find a way to show all posts in the user route
          return{
               'id': self.id,
               'title': self.title,
               'content': self.content,
               'created at': self.created_at,
               'comments': f'{self.get_comments()}',
-              'user_id': self.user_id
+              'user': self.user.to_dict(private=True)
          }
-    
+
     def get_comments(self):
          
          comments_list = []
          for i in range(len(self.comments)):
               comments_list.append(self.comments[i].id)
          return comments_list
+
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)

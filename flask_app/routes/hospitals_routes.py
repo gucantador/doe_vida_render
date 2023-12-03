@@ -5,6 +5,7 @@ from flask_app.utils.utils import check_and_update_hospitals, jwt_handling, pars
 from flask_jwt_extended import get_jwt
 from flask_app.constants import errors, messages
 from . import BaseResponse
+from flask_jwt_extended import jwt_required
 
 def get_app():
     from flask_app import app
@@ -138,7 +139,7 @@ def update_hospital_by_hospital_name(hospital_name):
     return response.response()
 
 @app.route("/hospitals/<string:hospital_name>", methods=["DELETE"])
-@jwt_handling
+@jwt_required()
 def delete_hospital_by_hospital_name(hospital_name):
   try:
     claims = get_jwt()
