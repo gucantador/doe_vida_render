@@ -42,8 +42,7 @@ def get_donation_order_by_id(donation_order_id):
 @app.route("/donations_orders", methods=["POST"])
 @jwt_required()
 def post_donation_order():
-  # test
-
+  try:
     patient_name = request.json["patient_name"]
     blood_type = request.json["blood_type"]
     description = request.json["description"]
@@ -53,18 +52,24 @@ def post_donation_order():
 
     requester = User.query.get(requester)
     claims = get_jwt()
-    if claims["role"]=='user' and claims['sub'] != requester.username:
-      response = BaseResponse(data=None, errors=errors["NOT_ACCESS_ERROR"], message=messages["NOT_ACCESS_ERROR_MESSAGE"])
+    if claims["role"] == 'user' and claims['sub'] != requester.username:
+      response = BaseResponse(data=None, errors=errors["NOT_ACCESS_ERROR"],
+                              message=messages["NOT_ACCESS_ERROR_MESSAGE"])
       return response.response(), 403
 
     hospital = Hospitals.query.filter_by(hospital_name=hospital).first()
+
+    if hospital is None:
+      response = BaseResponse(data=None, errors="The hospital is query is returned none", message="Maybe you wrote the hospital name in the wrong way")
+      return response.response()
+
     if hospital.donations_orders is None:
       hospital.donations_orders = 1
     else:
       hospital.donations_orders = hospital.donations_orders + 1
     db.session.add(hospital)
     db.session.commit()
-    
+
     new_donation_order = Donation_order(
       patient_name=patient_name,
       blood_type=blood_type,
@@ -77,10 +82,15 @@ def post_donation_order():
 
     db.session.add(new_donation_order)
     db.session.commit()
-    
+
     response = BaseResponse(data=new_donation_order.to_dict(), errors=None, message=messages["GENERAL_SUCCESS"])
 
     return response.response(), 200
+
+  except Exception as e:
+    print(e)
+    response = BaseResponse(data=None, errors=errors["INTERNAL_ERROR"], message=messages["INTERNAL_ERROR"])
+    return response.response()
 
 
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
