@@ -42,6 +42,7 @@ def get_donation_order_by_id(donation_order_id):
 @app.route("/donations_orders", methods=["POST"])
 @jwt_required()
 def post_donation_order():
+  # test
   try:
     patient_name = request.json["patient_name"]
     blood_type = request.json["blood_type"]
