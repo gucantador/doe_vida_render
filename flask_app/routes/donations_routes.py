@@ -43,7 +43,7 @@ def get_donation_order_by_id(donation_order_id):
 @jwt_required()
 def post_donation_order():
   # test
-  try:
+
     patient_name = request.json["patient_name"]
     blood_type = request.json["blood_type"]
     description = request.json["description"]
@@ -81,11 +81,7 @@ def post_donation_order():
     response = BaseResponse(data=new_donation_order.to_dict(), errors=None, message=messages["GENERAL_SUCCESS"])
 
     return response.response(), 200
-  
-  except Exception as e:
-    print(e)
-    response = BaseResponse(data=None, errors=errors["INTERNAL_ERROR"], message=messages["INTERNAL_ERROR"])
-    return response.response()
+
 
 @app.route("/donations_orders/<int:donation_order_id>", methods=["PUT"])
 @jwt_required()
